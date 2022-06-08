@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	bookdatastore "janes_book_store/book_data_store"
 	"log"
 	"net/http"
@@ -42,14 +42,27 @@ func getDetailsGeneralQuery(w http.ResponseWriter, r *http.Request) {
 
 }
 func publishBook(w http.ResponseWriter, r *http.Request) {
-	var booksParam bookdatastore.Book
-	booksParam = booksParam.fillRequest(r)
-	log.Println("Handler: ", booksParam)
-	//fmt.Fprintf(w, "%d %s %s", booksParam.BookID, booksParam.Author, booksParam.Title)
-	bookdatastore.PublishBook(booksParam)
+	var publishBooksParam bookdatastore.BooksWithAuthor
+	publishBooksParam = publishBooksParam.FillRequest(r)
+	log.Println("Handler: ", publishBooksParam)
+
+	book, err := bookdatastore.PublishBook(publishBooksParam)
+	if err == nil {
+		book_as_json, _ := json.Marshal(book)
+		fmt.Fprintf(w, string(book_as_json))
+	}
 }
 func unpublishBook(w http.ResponseWriter, r *http.Request) {
-
+	var publishBooksParam bookdatastore.BooksWithAuthor
+	publishBooksParam = publishBooksParam.FillRequest(r)
+	log.Println("Handler: ", publishBooksParam)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "current_user", r.Header.Get("author")) // This is authenticated already
+	err := bookdatastore.UnPublishBook(publishBooksParam, ctx)
+	if err == nil {
+		book_as_json, _ := json.Marshal(publishBooksParam)
+		fmt.Fprintf(w, "Unpublised: "+string(book_as_json))
+	}
 }
 func authorNew(w http.ResponseWriter, r *http.Request) {
 
@@ -102,30 +115,4 @@ func contains(s []string, str string) bool {
 	}
 
 	return false
-}
-
-
-func (ba bookdatastore.Book) fillRequest(r *http.Request) bookdatastore.Book {
-	body, err := getRawBody(r)
-	log.Println("Debug: ", string(body))
-	if err == nil {
-		err = json.Unmarshal(body, &ba)
-	}
-	if err != nil {
-		log.Println("Error: ", err.Error())
-		ba.Title, ba.Author, ba.BookID = "", "", 0
-	}
-	log.Println("Debug: ", ba)
-	return ba
-}
-
-func getRawBody(r *http.Request) ([]byte, error) {
-	if r.ContentLength == 0 {
-		return []byte{}, fmt.Errorf("error cannot be empty")
-	}
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return []byte{}, fmt.Errorf("cannot read request payload")
-	}
-	return body, nil
 }

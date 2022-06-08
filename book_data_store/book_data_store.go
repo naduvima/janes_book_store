@@ -3,6 +3,7 @@ package bookdatastore
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -23,16 +24,18 @@ func DbConnection() (*sql.DB, error) {
 	return db, nil
 }
 
-var INSERTSQL = "INSERT INTO %s(%s) VALUES ($1)"
+var InsertSql = "INSERT INTO %s(%s) VALUES (%s) RETURNING %s"
 
-func DbInsert(table string, columnsInsert string, valuesInsert string) error {
+func DbInsert(table string, columnsInsert string, valuesInsert string, primaryKey string) (int,error) {
+	var id int
 	db, err := DbConnection()
 	if err == nil {
-		INSERTSQL = fmt.Sprintf(INSERTSQL, table, columnsInsert)
-		_, err := db.Exec(INSERTSQL, valuesInsert)
+		InsertSql = fmt.Sprintf(InsertSql, table, columnsInsert,valuesInsert, primaryKey)
+		log.Println("SQL: ", InsertSql)
+		err := db.QueryRow(InsertSql).Scan(&id)
 		if err != nil {
-			return err
+			return 0,err
 		}
 	}
-	return nil
+	return id,nil
 }

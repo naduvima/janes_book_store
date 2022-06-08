@@ -31,7 +31,7 @@ func decodetRequest(tokenString string, user string) bool {
 
 func getPasswordForUsers(user string) []byte {
 	//users := map[string]string{"jane": "eyJkYXRhIjoidGVzdCJ9", "margo": "eyJhbGciOiJIUzI1NiJ9", "nair": "8h8W4cmvJwIX3UUp9J5yf41ax3"}
-	author, _ := bookdatastore.FindAuthor(user)
+	author, _ := bookdatastore.FindAuthor(bookdatastore.Author{AuthorName: user})
 
 	return []byte(author.Password)
 }

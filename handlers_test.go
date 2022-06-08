@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -22,19 +21,12 @@ func ParseResponse(res *http.Response) (string, int) {
 func Test_publishBook(t *testing.T) {
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		publishBook(w,r)
+		publishBook(w, r)
 	}
-	type PostData struct {
-		Title  string `json:"title"`
-		Author string `json:"author"`
-		BookID int    `json:"book_id"`
-	}
-	
-	data := PostData{"Fifty shades of gray","jane",1234}
 
-	body, _ := json.Marshal(data)
+	body := []byte(`{"author":{"author_name": "jane"},"book":{"title": "Fifty shades of gray","price": 20.99}}`)
 
-	req := httptest.NewRequest("POST","http://jb.com/books/publish", bytes.NewBuffer(body))
+	req := httptest.NewRequest("POST", "http://jb.com/books/publish", bytes.NewBuffer(body))
 	w := httptest.NewRecorder()
 	handler(w, req)
 
@@ -45,6 +37,16 @@ func Test_publishBook(t *testing.T) {
 		t.Error("invalid status code")
 	}
 	if parsedResp != `1234 jane Fifty shades of gray` {
-		t.Error("invalid response",parsedResp )
+		t.Error("invalid response", parsedResp)
 	}
 }
+
+//To do:-
+//Create test for unpublish
+
+//Create test for list books
+
+//Create test for details of a published book
+
+//Create an end point for user which gives a password back
+

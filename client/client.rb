@@ -10,7 +10,7 @@ payload = {"book": {"title": "Fire in the Winter","price": 32.0}, "author": {"au
 token = JWT.encode payload, password, 'HS256'
 
 headers = { 'author' => author, 'token' => token }
-response = RestClient.post 'http://localhost:8000/books/publish', payload.to_json, headers
+response = RestClient.post 'http://localhost:8080/books/publish', payload.to_json, headers
 puts response.code
 puts response.body
 

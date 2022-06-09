@@ -16,4 +16,8 @@ CREATE TABLE books (
     price numeric(15,4)
 );
 
-INSERT INTO authors(password, author_name) VALUES('eyJkYXRhIjoidGVzdCJ9', 'jane')
+--Test values
+INSERT INTO authors(password, author_name) VALUES('eyJkYXRhIjoidGVzdCJ9', 'Lucy score');
+
+INSERT INTO authors(password, author_name) VALUES('eyJkYXRhIjoidGVzdCJ9', 'Dave Gerad');
+INSERT INTO authors(password, author_name) VALUES('eyJkYXRhIjoidGVzdCJ9', 'Jane');

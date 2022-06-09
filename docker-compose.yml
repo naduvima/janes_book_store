@@ -1,0 +1,50 @@
+version: "3.7"
+networks:
+  internal:
+    driver: bridge
+volumes:
+  go-modules:
+  janes-books-data:
+  janes-books_setup:
+services:
+  janes-books_db:
+    container_name: janes-books_db
+    image: postgres:14.2-alpine
+    restart: always
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - janes-books-data
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+    tty: true
+  janes-books_api:
+    container_name: janes-books_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - janes-books_db
+    image: services/janes-books_db
+    environment:
+      DATABASE_URL: postgresql://janes-books_db/mydb?user=postgres&password=postgres
+      PGHOST: janes-books_db
+      PGUSER: postgres
+      PGSSLMODE: disable
+      PG_MAX_IDLE_CONN: 40
+      PG_MAX_OPEN_CONN: 80
+      CACHE_EXPIRATION_INTERVAL: 60s
+    volumes:
+      - .:/janes-books
+      - go-modules:/go/pkg/mod
+    tty:
+      true
+    networks:
+      - internal
+
+    
+

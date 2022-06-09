@@ -147,6 +147,13 @@ func (ba BooksWithAuthor) FillRequest(r *http.Request) BooksWithAuthor {
 	return ba
 }
 
+func (ba BooksWithAuthor) FillRequestFromUrl(r *http.Request) BooksWithAuthor {
+	ba = BooksWithAuthor{}
+	ba.Book.Title = r.URL.Query().Get("title")
+	ba.Author.AuthorName = r.URL.Query().Get("author")
+	return ba
+}
+
 func getRawBody(r *http.Request) ([]byte, error) {
 	if r.ContentLength == 0 {
 		return []byte{}, fmt.Errorf("error cannot be empty")

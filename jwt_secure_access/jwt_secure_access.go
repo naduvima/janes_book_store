@@ -3,6 +3,7 @@ package jwt_secure_access
 import (
 	"fmt"
 	bookdatastore "janes_book_store/book_data_store"
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt"
@@ -32,7 +33,7 @@ func decodetRequest(tokenString string, user string) bool {
 func getPasswordForUsers(user string) []byte {
 	//users := map[string]string{"jane": "eyJkYXRhIjoidGVzdCJ9", "margo": "eyJhbGciOiJIUzI1NiJ9", "nair": "8h8W4cmvJwIX3UUp9J5yf41ax3"}
 	author, _ := bookdatastore.FindAuthor(bookdatastore.Author{AuthorName: user})
-
+	log.Println("Password found: ", author.Password)
 	return []byte(author.Password)
 }
 

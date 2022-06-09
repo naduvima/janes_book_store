@@ -47,7 +47,14 @@ func getBooksGeneralQuery(w http.ResponseWriter, r *http.Request) {
 
 }
 func getDetailsGeneralQuery(w http.ResponseWriter, r *http.Request) {
-
+	var detailsQueryParam bookdatastore.BooksWithAuthor
+	detailsQueryParam = detailsQueryParam.FillRequestFromUrl(r)
+	log.Println("Handler: ", detailsQueryParam)
+	book, err := bookdatastore.FindBook(detailsQueryParam, "Book")
+	if err == nil {
+		book_as_json, _ := json.Marshal(book)
+		fmt.Fprintf(w, string(book_as_json))
+	}
 }
 func publishBook(w http.ResponseWriter, r *http.Request) {
 	var publishBooksParam bookdatastore.BooksWithAuthor
@@ -96,7 +103,7 @@ func initHandlers(mux *goji.Mux) {
 	//Middleware to authenticate using jwt, log the API start and end
 	//This framework can be enhanced with features.
 	mux.Use(logAndAuthenticate)
-	http.ListenAndServe("localhost:8000", mux)
+	http.ListenAndServe(":8080", mux)
 }
 
 //middleware take care of authentication of secured routes.
@@ -107,6 +114,7 @@ func logAndAuthenticate(inner http.Handler) http.Handler {
 			if jwt_secure_access.AuthorizeRequest(r) != true {
 				w.Write([]byte("Failed: Authorization"))
 				w.WriteHeader(http.StatusUnauthorized)
+				return
 			}
 		}
 		inner.ServeHTTP(w, r)

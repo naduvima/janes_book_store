@@ -1,6 +1,9 @@
 package bookdatastore
 
-import "database/sql"
+import (
+	"database/sql"
+	"log"
+)
 
 type Author struct {
 	AuthorID   int    `json:"author_id"`
@@ -14,8 +17,10 @@ func FindAuthor(author Author) (Author, error) {
 	db, err := DbConnection()
 
 	if err == nil {
-		err := db.QueryRow(selectUser, author.AuthorName).Scan(&author.AuthorID,&author.Password,&author.AuthorName)
-		if err != sql.ErrNoRows {
+		log.Println(selectUser, "---", author.AuthorName)
+		err = db.QueryRow(selectUser, author.AuthorName).Scan(&author.AuthorID, &author.Password, &author.AuthorName)
+		log.Println("Found: author", author)
+		if sql.ErrNoRows != nil {
 			return author, nil
 		}
 	}

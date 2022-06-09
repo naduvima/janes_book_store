@@ -30,7 +30,15 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getBooksFromAuthor(w http.ResponseWriter, r *http.Request) {
+	var publishBooksParam bookdatastore.BooksWithAuthor
+	publishBooksParam = publishBooksParam.FillRequest(r)
+	log.Println("Handler: ", publishBooksParam)
 
+	books, err := bookdatastore.FindBooks(publishBooksParam)
+	if err == nil {
+		books_as_json, _ := json.Marshal(books)
+		fmt.Fprintf(w, string(books_as_json))
+	}
 }
 func getDetailsOfaTitle(w http.ResponseWriter, r *http.Request) {
 

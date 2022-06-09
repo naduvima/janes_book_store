@@ -68,3 +68,34 @@ func TestFindBook(t *testing.T) {
 		})
 	}
 }
+
+func TestFindBooks(t *testing.T) {
+	type args struct {
+		queryParam BooksWithAuthor
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []BooksWithAuthor
+		wantErr bool
+	}{
+		{
+			"finds everything",
+			args{BooksWithAuthor{}},
+			[]BooksWithAuthor{},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := FindBooks(tt.args.queryParam)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FindBooks() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FindBooks() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

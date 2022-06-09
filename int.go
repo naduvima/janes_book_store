@@ -5,7 +5,6 @@ import (
 )
 
 
-
 func main() {
 	//init all http handlers called here.
 	mux := goji.NewMux()

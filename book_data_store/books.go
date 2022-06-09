@@ -34,16 +34,17 @@ type BooksWithAuthor struct {
 }
 
 var ColumnsInsert = "title,author_id,description,image_s3_url,price"
-var ValuesInsert = "'%s',%d,'%s','%s',%f"
 
 func PublishBook(ba BooksWithAuthor) (BooksWithAuthor, error) {
+	var valuesInsert = "'%s',%d,'%s','%s',%f"
 	//find if there is an author exists
 	author, err := FindAuthor(ba.Author)
 	if err == nil {
 		//proceed to publish it with author id
 		ba.Book.AuthorID = author.AuthorID
-		ValuesInsert = fmt.Sprintf(ValuesInsert, ba.Book.Title, ba.Book.AuthorID, ba.Book.Description, ba.Book.ImageS3Url, ba.Book.Price)
-		ba.Book.BookID, err = DbInsert("books", ColumnsInsert, ValuesInsert, "books_id")
+		valuesInsert = fmt.Sprintf(valuesInsert, ba.Book.Title, ba.Book.AuthorID, ba.Book.Description, ba.Book.ImageS3Url, ba.Book.Price)
+		log.Println("ValuesInsert", valuesInsert)
+		ba.Book.BookID, err = DbInsert("books", ColumnsInsert, valuesInsert, "books_id")
 	}
 	return ba, err
 }
@@ -68,7 +69,7 @@ func UnPublishBook(ba BooksWithAuthor, ctx context.Context) error {
 
 //wants to move SQL operations to datastore
 //keeping it as it is time being
-//REfactor required to move this to an intrface
+//Refactor required to move this to an interface
 //Make it clean by moving the SQL statements to datastore
 func FindBook(queryParam BooksWithAuthor, argType string) (BooksWithAuthor, error) {
 	var ba BooksWithAuthor
@@ -95,6 +96,41 @@ func FindBook(queryParam BooksWithAuthor, argType string) (BooksWithAuthor, erro
 		}
 	}
 	return BooksWithAuthor{}, err
+}
+
+func FindBooks(queryParam BooksWithAuthor) ([]BooksWithAuthor, error) {
+	db, err := DbConnection()
+	if err == nil {
+		selectBookSQL := "select title,author_name,description,image_s3_url,price from books "
+		selectBookSQL += " join authors on authors.author_id = books.author_id where  1 = 1"
+		if queryParam.Author.AuthorName != "" {
+			selectBookSQL += " and authors.author_name =  " + queryParam.Author.AuthorName
+		}
+		if queryParam.Book.Title != "" {
+			selectBookSQL += " and books.ttile = " + queryParam.Book.Title
+		}
+
+		log.Println("BooksWithAuthor:", queryParam.Author.AuthorName, queryParam.Book.Title)
+		log.Println("BooksWithAuthor:", selectBookSQL)
+		rows, err := db.Query(selectBookSQL)
+		defer rows.Close()
+
+		if err == nil {
+			var books []BooksWithAuthor
+			for rows.Next() {
+				var bk BooksWithAuthor
+				if err := rows.Scan(&bk.Book.Title, &bk.Author.AuthorName, &bk.Book.Description,
+					&bk.Book.ImageS3Url, &bk.Book.Price); err != nil {
+					return books, err
+				}
+				books = append(books, bk)
+			}
+			if err = rows.Err(); err == nil {
+				return books, err
+			}
+		}
+	}
+	return []BooksWithAuthor{}, err
 }
 
 func (ba BooksWithAuthor) FillRequest(r *http.Request) BooksWithAuthor {

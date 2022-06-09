@@ -17,9 +17,14 @@ token = JWT.encode payload, 'eyJkYXRhIjoidGVzdCJ9', 'HS256'
 irb(main):037:0>
 
 
+payload = {"book": {"title": "Fifty shades of gray"}, "author": {"author_name": "jane", "book_id": 1234}}
+
+
 Authentication Strategy is encrypt and decrypt by users own password ( non expiring)
 
 (1) Encrypt data in certain way with Author's(user) own given password using JWT
 (2) System retreives users stored password and try to decrypt , unsuccessful decrypt is Unauthorized attempt
+
+curl localhost:8000/books/author/jane 
 
 
